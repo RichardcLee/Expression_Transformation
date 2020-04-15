@@ -6,10 +6,17 @@ import glob
 import re
 import pickle
 
+"""
+    To generate AUs.pkl: assemble all single AUs already stored in csv file which named by image's name.
+    Note: you should first calculate AUs of every image for training or testing, and store AUs in a csv file which named by image's name.
+          In fact, you can use OpenFace.
+"""
+
 parser = argparse.ArgumentParser()
 parser.add_argument('-ia', '--input_aus_filesdir', type=str, help='Dir with imgs aus files')
 parser.add_argument('-op', '--output_path', type=str, help='Output path')
 args = parser.parse_args()
+
 
 def get_data(filepaths):
     data = dict()
@@ -19,9 +26,11 @@ def get_data(filepaths):
 
     return data
 
+
 def save_dict(data, name):
     with open(name + '.pkl', 'wb') as f:
         pickle.dump(data, f, pickle.HIGHEST_PROTOCOL)
+
 
 def main():
     filepaths = glob.glob(os.path.join(args.input_aus_filesdir, '*.csv'))

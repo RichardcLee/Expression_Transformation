@@ -37,7 +37,8 @@ class GANimationModel(BaseModel):
             self.load_ckpt(self.opt.load_epoch)  # 从指定epoch开始
 
     def setup(self):
-        super(GANimationModel, self).setup()
+        """ 训练模式下，配置优化器和学习率衰减策略 """
+        super(GANimationModel, self).setup()  # 调用基类setup
         if self.is_train:
             # setup optimizer
             self.optim_gen = torch.optim.Adam(self.net_gen.parameters(),
@@ -51,7 +52,7 @@ class GANimationModel(BaseModel):
             self.optims.append(self.optim_dis)
 
             # setup schedulers
-            # 每个optimizer有一个scheduler
+            # 每个optimizer有一个scheduler，以分别控制学习率的衰减
             self.schedulers = [model_utils.get_scheduler(optim, self.opt) for optim in self.optims]
 
     def feed_batch(self, batch):  # 转移预处理
@@ -61,9 +62,10 @@ class GANimationModel(BaseModel):
             self.src_aus = batch['src_aus'].type(torch.FloatTensor).to(self.device)
             self.tar_img = batch['tar_img'].to(self.device)
 
-    def forward(self):  # 前向传播：生成虚假图片<=>重建源图片
+    def forward(self):
+        """ 前向传播：生成虚假图片<=>重建源图片 """
         # 生成fake image，color_mask是色彩掩膜，aus_mask是注意力掩膜
-        self.color_mask ,self.aus_mask, self.embed = self.net_gen(self.src_img, self.tar_aus)  # 源图片+目标AUs=fake image
+        self.color_mask ,self.aus_mask, self.embed = self.net_gen(self.src_img, self.tar_aus)  # 源图片 + 目标AUs => fake image
         self.fake_img = self.aus_mask * self.src_img + (1 - self.aus_mask) * self.color_mask  # 两个掩膜融合成fake image
 
         # 重建 real image
@@ -74,15 +76,15 @@ class GANimationModel(BaseModel):
     def backward_dis(self):  # 判别器反向传播
         # real image，源图片
         pred_real, self.pred_real_aus = self.net_dis(self.src_img)
-        self.loss_dis_real = self.criterionGAN(pred_real, True)
-        self.loss_dis_real_aus = self.criterionMSE(self.pred_real_aus, self.src_aus)
+        self.loss_dis_real = self.criterionGAN(pred_real, True)   # GAN LOSS
+        self.loss_dis_real_aus = self.criterionMSE(self.pred_real_aus, self.src_aus)  # MSE LOSS
 
         # fake image, detach to stop backward to generator，虚假图片
         pred_fake, _ = self.net_dis(self.fake_img.detach()) 
-        self.loss_dis_fake = self.criterionGAN(pred_fake, False)
+        self.loss_dis_fake = self.criterionGAN(pred_fake, False)   # GAN LOSS
 
-        # combine dis loss
-        # lambda means weight here
+        # combine dis loss，得到总的损失
+        # lambda λ 代表权重
         self.loss_dis = self.opt.lambda_dis * (self.loss_dis_fake + self.loss_dis_real) \
                         + self.opt.lambda_aus * self.loss_dis_real_aus
 
@@ -126,8 +128,8 @@ class GANimationModel(BaseModel):
         self.forward()
         # update discriminator
         self.set_requires_grad(self.net_dis, True)
-        self.optim_dis.zero_grad() # clear
-        self.backward_dis() # backward时开始计算grad
+        self.optim_dis.zero_grad()  # clear
+        self.backward_dis()  # backward时开始计算grad
         self.optim_dis.step()
 
         if train_gen:  # 如果需要，更新Generator的参数

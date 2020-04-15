@@ -20,6 +20,7 @@ class BaseModel:
         self.models_name = []  # 用于存放模型名
 
     def setup(self):
+        """ 公操作，子类调用 """
         print("%s with Model [%s]" % (self.opt.mode.capitalize(), self.name))
 
         if self.is_train:  # 训练模式
@@ -99,9 +100,10 @@ class BaseModel:
     def optimize_paras(self):  # 重载
         pass
 
-    def update_learning_rate(self):  # 更新所有模型的学习率，并返回第一个优化器(Generator)的学习率
+    def update_learning_rate(self):
+        """更新所有模型的学习率，并返回第一个优化器(Generator)的学习率，将被继承"""
         for scheduler in self.schedulers:
-            scheduler.step()
+            scheduler.step()  # 应用学习率衰减策略
         lr = self.optims[0].param_groups[0]['lr']
         return lr
 
@@ -171,7 +173,7 @@ class BaseModel:
         """
         施加梯度惩罚
         :math   x: inter_img, y: inter_img_prob
-        :math   L2_norm(dy/dx) - 1)**2
+        :math   L2_norm((dy/dx) - 1)**2
         :param input_img: input original/real image
         :param generate_img: generate fake image
         :return:

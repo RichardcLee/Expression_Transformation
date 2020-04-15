@@ -5,6 +5,9 @@ import numpy as np
 
 
 class FaceExtracter(object):
+    """
+        检测人脸边界并裁剪，边界将被存储到json文件中
+    """
     def __init__(self, image_path: str, output_path: str, boundbox_store_path: str, final_size: [tuple, list]):
         # path of image want to extract，note: all images should be placed in sub-dir imgs
         self.image_path = image_path + "/"
