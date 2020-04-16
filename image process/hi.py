@@ -1,103 +1,28 @@
-# """
-# 图像基础调整: 图像的亮度、对比度、色度，还可以用于增强图像的锐度,美白
-# """
-
-from PIL import Image
-from PIL import ImageEnhance
 import cv2
-import numpy as np
 
+# 读取本相对路径下的initial.bmp文件
+image = cv2.imread ("1.jpg")
+image.resize()
+# 将image对应图像在图像窗口显示出来
+cv2.imshow('initial',image)
+# waitKey使窗口保持静态直到用户按下一个键
 
-def BrightnessEnhancement(brightness):
-    # '''
-    # #亮度增强 :brightness在（0-1）之间，新图像较原图暗，在（1-~）新图像较原图亮 ,
-    # ##brightness=1,保持原图像不变;可自定义参数范围
-    # '''
-    image = Image.open(filepath)
-    enh_bri = ImageEnhance.Brightness(image)
-#    brightness =1.5
-    image_brightened = enh_bri.enhance(brightness)
-    image_brightened.show("brighten")
+# 对图像进行阈值分割，阈值设定为80，得到二值化灰度图
+ret,image1 = cv2.threshold(image,80,255,cv2.THRESH_BINARY)
+cv2.imshow('grayscale',image1)
 
+image2 = image1.copy()		# 复制图片
+for i in range(0,image1.shape[0]):	#image.shape表示图像的尺寸和通道信息(高,宽,通道)
+    for j in range(0,image1.shape[1]):
+	    image2[i,j]= 255 - image1[i,j]
+cv2.imshow('colorReverse',image2)
 
-def ContrastEnhancement(contrast):
-    # '''
-    # #对比度增强: 可自定义参数contrast范围,contrast=1,保持原图像不变
-    # '''
-    image = Image.open(filepath)
-    enh_con = ImageEnhance.Contrast(image)
-#    contrast =1.5
-    image_contrasted = enh_con.enhance(contrast)
-    image_contrasted.show("contrast")
-
-
-def ColorEnhancement(color):
-    # '''
-    # #色度增强 : 饱和度  color=1,保持原图像不变
-    # '''
-    image = Image.open(filepath)
-    enh_col = ImageEnhance.Color(image)
-#    color =0.8
-    image_colored = enh_col.enhance(color)
-    image_colored.show("color")
-
-
-def SharpnessEnhancement(sharpness):
-    # '''
-    # #锐度增强: 清晰度  sharpness=1,保持原图像不变
-    # '''
-    image = Image.open(filepath)
-    enh_sha = ImageEnhance.Sharpness(image)
-#    sharpness = 2
-    image_sharped = enh_sha.enhance(sharpness)
-    image_sharped.show("sharpness")
-
-
-def Filter(image):
-    # """
-    # 色彩窗的半径
-    # 图像将呈现类似于磨皮的效果
-    # """
-    #image：输入图像，可以是Mat类型，
-    #       图像必须是8位或浮点型单通道、三通道的图像
-    #0：表示在过滤过程中每个像素邻域的直径范围，一般为0
-    #后面两个数字：空间高斯函数标准差，灰度值相似性标准差
-    image = cv2.imread(filepath)
-    Remove = cv2.bilateralFilter(image,0,0,10)
-    cv2.imshow('filter', Remove)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
-#    res = np.uint8(np.clip((1.2 * image + 10), 0, 255))
-#    tmp = np.hstack((dst, res))
-#    cv2.imshow('bai',res)
-
-
-def WhiteBeauty(image, whi):
-    # '''
-    # 美白
-    # '''
-    import cv2
-
-    image =cv2.imread(filepath)
-    white = np.uint8(np.clip((whi * image + 10), 0, 255))
-    cv2.imshow('bai', white)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
-#    cv2.imwrite('/home/260207/桌面/photo/15-1.jpg',dst)
-
-
-if __name__ =="__main__":
-    filepath = r'C:\Users\81955\Desktop\temp_result\src_25_0_tar_19_0.jpg'
-    # 原始图像
-    brightness = 1.5
-    contrast = 0.2
-    color=1.9
-    sharpness=0.1
-    BrightnessEnhancement(brightness)
-    ContrastEnhancement(contrast)
-    ColorEnhancement(color)
-    SharpnessEnhancement(sharpness)
-    whi = 1.2
-    image =cv2.imread(r'C:\Users\81955\Desktop\temp_result\src_25_0_tar_19_0.jpg')
-    Filter(image)
-    WhiteBeauty(image, whi)
+# 边缘提取
+img = cv2.cvtColor(image2,cv2.COLOR_BGR2GRAY)
+canny_img_one = cv2.Canny(img,300,150)
+canny_img_two = canny_img_one.copy()	# 复制图片
+for i in range(0,canny_img_one.shape[0]):	#image.shape表示图像的尺寸和通道信息(高,宽,通道)
+	for j in range(0,canny_img_one.shape[1]):
+		canny_img_two[i,j]= 255 - canny_img_one[i,j]
+cv2.imshow('edge',canny_img_two)
+cv2.waitKey(0)

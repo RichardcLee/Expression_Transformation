@@ -173,7 +173,7 @@ class BaseModel:
         """
         施加梯度惩罚
         :math   x: inter_img, y: inter_img_prob
-        :math   L2_norm((dy/dx) - 1)**2
+        :math   (L2_norm(dy/dx) - 1)**2
         :param input_img: input original/real image
         :param generate_img: generate fake image
         :return:
@@ -182,6 +182,7 @@ class BaseModel:
         inter_img = (alpha * input_img.data + (1 - alpha) * generate_img.data).requires_grad_(True)
         inter_img_prob, _ = self.net_dis(inter_img)  # 返回probability和AU向量
 
+        # 计算并返回outputs对inputs的梯度
         dydx = torch.autograd.grad(outputs=inter_img_prob,
                                    inputs=inter_img,
                                    grad_outputs=torch.ones(inter_img_prob.size()).to(self.device),
@@ -189,6 +190,6 @@ class BaseModel:
                                    create_graph=True,
                                    only_inputs=True)[0]
 
-        dydx = dydx.view(dydx.size(0), -1)  # 拉成一维
+        dydx = dydx.view(dydx.size(0), -1)  # 拉成一维向量
         dydx_l2norm = torch.sqrt(torch.sum(dydx ** 2, dim=1))  # L2范数
         return torch.mean((dydx_l2norm - 1) ** 2)

@@ -106,9 +106,9 @@ class GANimationModel(BaseModel):
         self.loss_gen_rec = self.criterionL1(self.rec_real_img, self.src_img)  # L1重建损失
 
         # constrain on AUs mask（注意的是动作，所以也叫aus_mask），防止AUs过饱和（全为1）而失去效用
-        # real_img ,fake_img 都会有一张注意力掩膜
-        self.loss_gen_mask_real_aus = torch.mean(self.aus_mask)
-        self.loss_gen_mask_fake_aus = torch.mean(self.rec_aus_mask)
+        # real_img ,fake_img 通过生成器都产生一张注意力掩膜和一张色彩掩模
+        self.loss_gen_mask_real_aus = torch.mean(self.aus_mask)  # 生成的aus_mask
+        self.loss_gen_mask_fake_aus = torch.mean(self.rec_aus_mask)  # 重建的rec_aus_mask
 
         # 总变分损失，对注意力掩膜进行平滑处理
         self.loss_gen_smooth_real_aus = self.criterionTV(self.aus_mask)
