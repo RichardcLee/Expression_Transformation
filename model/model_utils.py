@@ -173,7 +173,7 @@ class GANLoss(nn.Module):
         self.register_buffer('real_label', torch.tensor(target_real_label))
         self.register_buffer('fake_label', torch.tensor(target_fake_label))
         self.gan_type = gan_type
-        if self.gan_type == 'wgan-gp':  # EM距离
+        if self.gan_type == 'wgan-gp':
             self.loss = lambda x, y: -torch.mean(x) if y else torch.mean(x)
         elif self.gan_type == 'lsgan':  # 损失敏感GAN，使用均方误差
             self.loss = nn.MSELoss()
@@ -504,7 +504,7 @@ class SplitGenerator(nn.Module):
         for i in range(n_blocks):  # 默认6个残差块，默认填充方式为zero, Ic:256 Oc:256
             model += [ResnetBlock(ngf * mult, padding_type=padding_type, norm_layer=norm_layer, use_dropout=use_dropout, use_bias=use_bias)]
 
-        for i in range(n_downsampling):  # 上采样？
+        for i in range(n_downsampling):  # 上采样
             mult = 2**(n_downsampling - i)  # 2^2=4, 2^1=2
             model += [nn.ConvTranspose2d(ngf * mult, int(ngf * mult / 2),
                                          kernel_size=4, stride=2, padding=1,
@@ -525,20 +525,25 @@ class SplitGenerator(nn.Module):
         self.au_top = nn.Sequential(*au_top)
 
         # from torchsummary import summary
-        # summary(self.model.to("cuda"), (20, 128, 128))
-        # summary(self.color_top.to("cuda"), (64, 128, 128))
-        # summary(self.au_top.to("cuda"), (64, 128, 128))
+        # summary(self.model.to("cuda"), (20, 148, 148))
+        # summary(self.color_top.to("cuda"), (64, 148, 148))
+        # summary(self.au_top.to("cuda"), (64, 148, 148))
         # assert False
 
     def forward(self, img, au):
         # replicate AUs vector to match image shap and concate to construct input 
         sparse_au = au.unsqueeze(2).unsqueeze(3)  # 在当前第二维增加一个维度，然后又在当前第三维增加一个维度
+        # 把AUs扩展成[batch, N, H, W]，其中N为AUs向量长度（默认17），H和W分别为图像高和宽，batch为batch size
         sparse_au = sparse_au.expand(sparse_au.size(0), sparse_au.size(1), img.size(2), img.size(3))
-        self.input_img_au = torch.cat([img, sparse_au], dim=1)  # 把输入的原图像和目标AUs拼接到一起
+        # 把输入的原图像和目标AUs拼接到一起 [batch, C+N, H, W]，其中C为图片通道数（默认3）
+        self.input_img_au = torch.cat([img, sparse_au], dim=1)
 
         embed_features = self.model(self.input_img_au)  # 模型产出内嵌特征图
 
         return self.color_top(embed_features), self.au_top(embed_features), embed_features  # 返回色彩掩模、注意力掩膜和内嵌特征图
+
+# 测试，取消summary注释
+# SplitGenerator(3, 17)
 
 
 class SplitDiscriminator(nn.Module):
@@ -567,14 +572,18 @@ class SplitDiscriminator(nn.Module):
             cur_dim = 2 * cur_dim
 
         self.model = nn.Sequential(*sequence)
-        # patch discriminator top , 类似patchGAN
+        # patch discriminator top , patchGAN
+        dis_top = []
         self.dis_top = nn.Conv2d(cur_dim, 1, kernel_size=kw-1, stride=1, padding=padw, bias=False)
         # AUs classifier top，Aus分类器
         k_size = int(image_size / (2 ** n_layers))  # 默认128/(2^6)=2
         self.aus_top = nn.Conv2d(cur_dim, aus_nc, kernel_size=k_size, stride=1, bias=False)
 
         # from torchsummary import summary
-        # summary(self.model.to("cuda"), (3, 128, 128))
+        # summary(self.model.to("cuda"), (3, 148, 148))
+        # summary(self.dis_top.to("cuda"), (2048, 2, 2))
+        # summary(self.aus_top.to("cuda"), (2048, 2, 2))
+        # assert False
 
     def forward(self, img):
         embed_features = self.model(img)
@@ -583,13 +592,17 @@ class SplitDiscriminator(nn.Module):
         return pred_map.squeeze(), pred_aus.squeeze()
 
 
+# 测试，取消summary注释
+# SplitDiscriminator(3, 17)
+
+
 # https://github.com/jxgu1016/Total_Variation_Loss.pytorch/blob/master/TVLoss.py
 class TVLoss(nn.Module):  # 总变分损失
     def __init__(self, TVLoss_weight=1):
-        super(TVLoss,self).__init__()
+        super(TVLoss, self).__init__()
         self.TVLoss_weight = TVLoss_weight
 
-    def forward(self,x):
+    def forward(self, x):
         batch_size = x.size()[0]
         h_x = x.size()[2]
         w_x = x.size()[3]

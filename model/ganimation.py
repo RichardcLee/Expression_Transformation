@@ -76,19 +76,19 @@ class GANimationModel(BaseModel):
     def backward_dis(self):  # 判别器反向传播
         # real image，源图片
         pred_real, self.pred_real_aus = self.net_dis(self.src_img)
-        self.loss_dis_real = self.criterionGAN(pred_real, True)   # GAN LOSS
-        self.loss_dis_real_aus = self.criterionMSE(self.pred_real_aus, self.src_aus)  # MSE LOSS
+        self.loss_dis_real = self.criterionGAN(pred_real, True)   # WGAN-GP对抗损失第一项
+        self.loss_dis_real_aus = self.criterionMSE(self.pred_real_aus, self.src_aus)  # 条件表情损失第二项
 
         # fake image, detach to stop backward to generator，虚假图片
         pred_fake, _ = self.net_dis(self.fake_img.detach()) 
-        self.loss_dis_fake = self.criterionGAN(pred_fake, False)   # GAN LOSS
+        self.loss_dis_fake = self.criterionGAN(pred_fake, False)   # WGAN-GP对抗损失第二项
 
         # combine dis loss，得到总的损失
         # lambda λ 代表权重
         self.loss_dis = self.opt.lambda_dis * (self.loss_dis_fake + self.loss_dis_real) \
                         + self.opt.lambda_aus * self.loss_dis_real_aus
 
-        if self.opt.gan_type == 'wgan-gp':  # WGAN需要施加梯度惩罚,惩罚项为L2范数
+        if self.opt.gan_type == 'wgan-gp':  # WGAN-GP对抗损失第三项，施加梯度惩罚，L2范数，
             self.loss_dis_gp = self.gradient_penalty(self.src_img, self.fake_img)
             self.loss_dis = self.loss_dis + self.opt.lambda_wgan_gp * self.loss_dis_gp
         
@@ -96,17 +96,17 @@ class GANimationModel(BaseModel):
         self.loss_dis.backward()
 
     def backward_gen(self):	 # 生成器反向传播
-        # original to target domain, should fake the discriminator
+        # 从源图片生成到符合目标表情的虚假图像，生成器需要尽可能骗过判别器
         pred_fake, self.pred_fake_aus = self.net_dis(self.fake_img)
-        self.loss_gen_GAN = self.criterionGAN(pred_fake, True)
+        self.loss_gen_GAN = self.criterionGAN(pred_fake, True)   # GAN LOSS
         # pred值是图片为真的概率，True or False表示计算相对于True或者False的损失
-        self.loss_gen_fake_aus = self.criterionMSE(self.pred_fake_aus, self.tar_aus)
+        self.loss_gen_fake_aus = self.criterionMSE(self.pred_fake_aus, self.tar_aus)  # 条件损失第一项
 
-        # target to original domain reconstruct, identity loss
-        self.loss_gen_rec = self.criterionL1(self.rec_real_img, self.src_img)  # L1重建损失
+        # 从符合目标表情的虚假图片重建原始表情的源图片, identity loss，也即循环一致性损失
+        self.loss_gen_rec = self.criterionL1(self.rec_real_img, self.src_img)  # 循环一致性损失
 
         # constrain on AUs mask（注意的是动作，所以也叫aus_mask），防止AUs过饱和（全为1）而失去效用
-        # real_img ,fake_img 通过生成器都产生一张注意力掩膜和一张色彩掩模
+        # real_img ,fake_img 通过生成器各产生一张注意力掩膜和一张色彩掩模
         self.loss_gen_mask_real_aus = torch.mean(self.aus_mask)  # 生成的aus_mask
         self.loss_gen_mask_fake_aus = torch.mean(self.rec_aus_mask)  # 重建的rec_aus_mask
 
@@ -114,8 +114,7 @@ class GANimationModel(BaseModel):
         self.loss_gen_smooth_real_aus = self.criterionTV(self.aus_mask)
         self.loss_gen_smooth_fake_aus = self.criterionTV(self.rec_aus_mask)
 
-        # combine and backward G loss
-        # 简单的线性叠加，每个损失有一个系数（是超参数，需要通过训练学习）
+        # 线性叠加所有损失项，每个损失有一个系数（是超参数，需要通过训练学习）
         self.loss_gen = self.opt.lambda_dis * self.loss_gen_GAN \
                         + self.opt.lambda_aus * self.loss_gen_fake_aus \
                         + self.opt.lambda_rec * self.loss_gen_rec \

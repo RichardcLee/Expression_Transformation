@@ -178,7 +178,7 @@ class BaseModel:
         :param generate_img: generate fake image
         :return:
         """
-        alpha = torch.rand(input_img.size(0), 1, 1, 1).to(self.device)
+        alpha = torch.rand(input_img.size(0), 1, 1, 1).to(self.device)  # WGAN-GP论文提出
         inter_img = (alpha * input_img.data + (1 - alpha) * generate_img.data).requires_grad_(True)
         inter_img_prob, _ = self.net_dis(inter_img)  # 返回probability和AU向量
 

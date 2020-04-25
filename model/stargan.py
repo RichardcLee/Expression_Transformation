@@ -65,7 +65,7 @@ class StarGANModel(BaseModel):
         self.loss_dis_fake = self.criterionGAN(pred_fake, False)
 
         # combine dis loss
-        self.loss_dis =   self.opt.lambda_dis * (self.loss_dis_fake + self.loss_dis_real) \
+        self.loss_dis =  self.opt.lambda_dis * (self.loss_dis_fake + self.loss_dis_real) \
                         + self.opt.lambda_aus * self.loss_dis_real_aus
         if self.opt.gan_type == 'wgan-gp':
             self.loss_dis_gp = self.gradient_penalty(self.src_img, self.fake_img)
