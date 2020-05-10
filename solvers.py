@@ -16,9 +16,9 @@ def create_solver(opt):
 class Solver(object):
     def __init__(self, opt):
         super(Solver, self).__init__()
-        self._initialize(opt)
+        self.initialize(opt)
 
-    def _initialize(self, opt):  # 初始化
+    def initialize(self, opt):  # 初始化
         self.opt = opt  # 传入参数配置
         self.visual = Visualizer(opt)  # 根据参数配置创建可视化模块
 

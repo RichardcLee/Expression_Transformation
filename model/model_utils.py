@@ -525,9 +525,9 @@ class SplitGenerator(nn.Module):
         self.au_top = nn.Sequential(*au_top)
 
         # from torchsummary import summary
-        # summary(self.model.to("cuda"), (20, 148, 148))
-        # summary(self.color_top.to("cuda"), (64, 148, 148))
-        # summary(self.au_top.to("cuda"), (64, 148, 148))
+        # summary(self.model.to("cuda"), (20, 128, 128))
+        # summary(self.color_top.to("cuda"), (64, 128, 128))
+        # summary(self.au_top.to("cuda"), (64, 128, 128))
         # assert False
 
     def forward(self, img, au):
@@ -580,7 +580,7 @@ class SplitDiscriminator(nn.Module):
         self.aus_top = nn.Conv2d(cur_dim, aus_nc, kernel_size=k_size, stride=1, bias=False)
 
         # from torchsummary import summary
-        # summary(self.model.to("cuda"), (3, 148, 148))
+        # summary(self.model.to("cuda"), (3, 128, 128))
         # summary(self.dis_top.to("cuda"), (2048, 2, 2))
         # summary(self.aus_top.to("cuda"), (2048, 2, 2))
         # assert False

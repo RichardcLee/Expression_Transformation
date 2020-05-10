@@ -17,9 +17,9 @@ def create_dataloader(opt):  # 根据配置创建一个DataLoader，有两种：
 
 class DataLoader:  # emotion和celeb都使用CelebA; 自定义的数据集需要重载BaseDataSet！
     def __init__(self, opt):
-        self._initialize(opt)
+        self.initialize(opt)
 
-    def _initialize(self, opt):
+    def initialize(self, opt):
         self.opt = opt
         self.dataset = self.create_dataset()
         self.dataloader = torch.utils.data.DataLoader(
@@ -33,7 +33,7 @@ class DataLoader:  # emotion和celeb都使用CelebA; 自定义的数据集需要
         loaded_dataset = os.path.basename(self.opt.data_root.strip('/')).lower()
         if 'celeba' in loaded_dataset or 'emotion' in loaded_dataset:  # celebA 和 emotionNet 数据集使用 CelebADataset
             dataset = CelebADataset(self.opt)
-        elif 'face' in loaded_dataset:  # 自定义测试或训练，使用face数据集
+        elif 'face' in loaded_dataset:  # 自定义测试或训练，使用face数据集（自定义）
             dataset = FaceDataset(self.opt)
         else:
             dataset = BaseDataset(self.opt)

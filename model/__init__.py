@@ -10,6 +10,6 @@ def create_model(opt): # 创建模型
         instance = StarGANModel()
     else:
         instance = BaseModel()
-    instance._initialize(opt)
+    instance.initialize(opt)
     instance.setup()
     return instance

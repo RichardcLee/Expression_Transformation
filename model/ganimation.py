@@ -9,8 +9,8 @@ class GANimationModel(BaseModel):
         super(GANimationModel, self).__init__()
         self.name = "GANimation"
 
-    def _initialize(self, opt):
-        super(GANimationModel, self)._initialize(opt)
+    def initialize(self, opt):
+        super(GANimationModel, self).initialize(opt)
 
         self.net_gen = model_utils.define_splitG(self.opt.img_nc,  # 通道数
                                                  self.opt.aus_nc,  # AU向量维数
@@ -98,11 +98,11 @@ class GANimationModel(BaseModel):
     def backward_gen(self):	 # 生成器反向传播
         # 从源图片生成到符合目标表情的虚假图像，生成器需要尽可能骗过判别器
         pred_fake, self.pred_fake_aus = self.net_dis(self.fake_img)
-        self.loss_gen_GAN = self.criterionGAN(pred_fake, True)   # GAN LOSS
+        self.loss_gen_GAN = self.criterionGAN(pred_fake, True)   # GAN LOSS Mean
         # pred值是图片为真的概率，True or False表示计算相对于True或者False的损失
-        self.loss_gen_fake_aus = self.criterionMSE(self.pred_fake_aus, self.tar_aus)  # 条件损失第一项
+        self.loss_gen_fake_aus = self.criterionMSE(self.pred_fake_aus, self.tar_aus)  # 条件表情损失第一项
 
-        # 从符合目标表情的虚假图片重建原始表情的源图片, identity loss，也即循环一致性损失
+        # 从符合目标表情的虚假图片重建原始表情的源图片, 身份损失，也即循环一致性损失
         self.loss_gen_rec = self.criterionL1(self.rec_real_img, self.src_img)  # 循环一致性损失
 
         # constrain on AUs mask（注意的是动作，所以也叫aus_mask），防止AUs过饱和（全为1）而失去效用

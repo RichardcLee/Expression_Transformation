@@ -10,8 +10,8 @@ class StarGANModel(BaseModel):
         super(StarGANModel, self).__init__()
         self.name = "StarGAN"
 
-    def _initialize(self, opt):
-        super(StarGANModel, self)._initialize(opt)
+    def initialize(self, opt):
+        super(StarGANModel, self).initialize(opt)
 
         self.net_gen = model_utils.define_splitG(self.opt.img_nc, self.opt.aus_nc, self.opt.ngf, use_dropout=self.opt.use_dropout, 
                     norm=self.opt.norm, init_type=self.opt.init_type, init_gain=self.opt.init_gain, gpu_ids=self.gpu_ids)

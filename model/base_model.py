@@ -11,7 +11,7 @@ class BaseModel:
         super(BaseModel, self).__init__()
         self.name = "Base"
 
-    def _initialize(self, opt):
+    def initialize(self, opt):
         self.opt = opt
         self.gpu_ids = self.opt.gpu_ids
         self.device = torch.device('cuda:%d' % self.gpu_ids[0] if self.gpu_ids else 'cpu')

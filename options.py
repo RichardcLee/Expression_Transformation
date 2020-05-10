@@ -13,7 +13,7 @@ class Options(object):
     def __init__(self):
         super(Options, self).__init__()
         
-    def _initialize(self):   # 初始化
+    def initialize(self):   # 初始化
         parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
         # 模式：训练 || 测试
         parser.add_argument('--mode', type=str, default='train', help='Mode of code. [train|test]')
@@ -50,17 +50,17 @@ class Options(object):
         # 该csv中需包含数据集中用于测试的图片的id（即文件名）
         parser.add_argument('--test_csv', type=str, default="test_ids.csv", help='test images paths')
         # 批大小
-        parser.add_argument('--batch_size', type=int, default=25, help='input batch size.')
+        parser.add_argument('--batch_size', type=int, default=32, help='input batch size.')
         # 设置后，将不对数据进行shuffle
         parser.add_argument('--serial_batches', action='store_true', help='if specified, input images in order.')
         # 线程数
-        parser.add_argument('--n_threads', type=int, default=6, help='number of workers to load data.')
+        parser.add_argument('--n_threads', type=int, default=16, help='number of workers to load data.')
         # 最多使用的图片数
         parser.add_argument('--max_dataset_size', type=int, default=float("inf"), help='maximum number of samples.')
         # 图像预处理（图像增强），在windows下设置none会出错，这是pickle在windows下对默认none时使用lambda函数的不支持造成的
         parser.add_argument('--resize_or_crop', type=str, default='none', help='Preprocessing image, [resize_and_crop|crop|none]')
-        # 预处理时，调整图片尺寸到size
-        parser.add_argument('--load_size', type=int, default=148, help='scale image to this size.')
+        # 预处理时，调整图片尺寸到size 128 (2的次幂比较好，方便GPU并行计算)
+        parser.add_argument('--load_size', type=int, default=128, help='scale image to this size.')
         # 最终图片大小
         parser.add_argument('--final_size', type=int, default=128, help='crop image to this size.')
         # 预处理不进行图像翻转
@@ -110,20 +110,20 @@ class Options(object):
         parser.add_argument('--epoch_count', type=int, default=1, help='the starting epoch count, we save the model by <epoch_count>, <epoch_count>+<save_latest_freq>, ...')
 
         # niter + niter_decay = 总epoch（包括预训练模型的epoch）
-        # 保持初始学习率的迭代次数，应等于预训练模型epoch
+        # 保持初始学习率的迭代次数
         parser.add_argument('--niter', type=int, default=20, help='# of iter at starting learning rate')
         # 线性下降学习率到零的次数
         parser.add_argument('--niter_decay', type=int, default=10, help='# of iter to linearly decay learning rate to zero')
 
         # 各种损失项的权重
-        parser.add_argument('--lambda_dis', type=float, default=1.0, help='discriminator weight in loss')
-        parser.add_argument('--lambda_aus', type=float, default=160.0, help='AUs weight in loss')
-        parser.add_argument('--lambda_rec', type=float, default=10.0, help='reconstruct loss weight')
+        parser.add_argument('--lambda_dis', type=float, default=1.0, help='discriminator weight in loss')  # 对抗损失权重
+        parser.add_argument('--lambda_aus', type=float, default=160.0, help='AUs weight in loss')  # 条件表情损失权重
+        parser.add_argument('--lambda_rec', type=float, default=10.0, help='reconstruct loss weight')  # 循环一致性损失权重（身份损失）
         parser.add_argument('--lambda_mask', type=float, default=0, help='mse loss weight')
         parser.add_argument('--lambda_tv', type=float, default=0, help='total variation loss weight')
-        parser.add_argument('--lambda_wgan_gp', type=float, default=10., help='wgan gradient penalty weight')
+        parser.add_argument('--lambda_wgan_gp', type=float, default=10., help='wgan gradient penalty weight')  # 梯度惩罚项权重
 
-        # 每多少次迭代训练一次生成器
+        # 每多少次迭代训练一次生成器，TTUR 5:1
         parser.add_argument('--train_gen_iter', type=int, default=5, help='train G every n interations.')
         # 打印损失的频率
         parser.add_argument('--print_losses_freq', type=int, default=100, help='print log every print_freq step.')
@@ -133,7 +133,7 @@ class Options(object):
         return parser
 
     def parse(self):    # 解析参数
-        parser = self._initialize()  # 初始化默认值和参数项
+        parser = self.initialize()  # 初始化默认值和参数项
         parser.set_defaults(name=datetime.now().strftime("%y%m%d_%H%M%S"))  # 设置name参数，初值为当前时间
         opt = parser.parse_args()   # 命令行参数
         dataset_name = os.path.basename(opt.data_root.strip('/'))

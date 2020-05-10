@@ -6,9 +6,9 @@ from PIL import Image
 class Visualizer(object):
     def __init__(self, opt):
         super(Visualizer, self).__init__()
-        self._initialize(opt)
+        self.initialize(opt)
 
-    def _initialize(self, opt):
+    def initialize(self, opt):
         self.opt = opt
         self.display = self.opt.display  # 是否开启可视化
 

@@ -9,9 +9,9 @@ class BaseDataset(torch.utils.data.Dataset):
     """ 数据集基类 """
     def __init__(self, opt):
         super(BaseDataset, self).__init__()
-        self._initialize(opt)
+        self.initialize(opt)
 
-    def _initialize(self, opt):
+    def initialize(self, opt):
         """ 初始化所有数据集的公操作，此方法将被继承 """
         self.opt = opt
         self.imgs_dir = os.path.join(self.opt.data_root, self.opt.imgs_dir)  # 数据集路径+图片路径
