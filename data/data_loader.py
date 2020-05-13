@@ -39,9 +39,6 @@ class DataLoader:  # emotion和celeb都使用CelebA; 自定义的数据集需要
             dataset = BaseDataset(self.opt)
         return dataset
 
-    def name(self):
-        return self.dataset.name() + "_Loader"
-
     def __len__(self):
         return min(len(self.dataset), self.opt.max_dataset_size)  # max_dataset_size的限制数据集中的图片数量
 
@@ -50,3 +47,7 @@ class DataLoader:  # emotion和celeb都使用CelebA; 自定义的数据集需要
             if i * self.opt.batch_size >= self.opt.max_dataset_size:  # max_dataset_size的限制数据集中的图片数量
                 break
             yield data
+
+    def name(self):
+        return self.dataset.name() + "_Loader"
+

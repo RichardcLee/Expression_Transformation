@@ -1,6 +1,9 @@
 import numpy as np
 import torch
 from PIL import Image
+import os
+from matplotlib import pyplot as plt
+import re
 
 
 class Visualizer(object):
@@ -10,10 +13,67 @@ class Visualizer(object):
 
     def initialize(self, opt):
         self.opt = opt
-        self.display = self.opt.display  # 是否开启可视化
+        self.losses = {
+            "dis_fake": [],
+            "dis_real": [],
+            "dis_real_aus": [],
+            "gen_rec": [],
+            'dis': [],
+            'gen': [],
+            "total": []
+        }
+        plt.rcParams['font.sans-serif'] = ['SimHei']  # 用来正常显示中文标签
+        plt.rcParams['axes.unicode_minus'] = False  # 用来正常显示负号
 
-        if self.display:  # 表示启用
-            pass  # todo
+    # 绘制当前损失波动图、可视化当前模型训练中间图
+    def plot(self, plot_dict):  # 绘制方法
+        img_dict = plot_dict['img']
+        # 可视化训练过程中的效果
+        for name, img in img_dict.items():
+            tmp = self.numpy2im(img.cpu().detach().float().numpy()[0])  # 注意一个batch 25张图，这里只选择一张即可
+            path = os.path.join(plot_dict['visual_path'], name+'.jpg')
+            tmp.save(path)
+            tmp.close()
+        # 可视化损失波动
+        self._plot_loss(plot_dict['visual_path'])
+
+    def _plot_loss(self, visual_path):
+        plt.figure(dpi=120)
+        plt.tight_layout()
+        plt.subplots_adjust(wspace=0.4, hspace=0.45)  # 调整子图间距
+        xy = ["321", "322", "323", "324", '325', '326']
+        widths = [0.09, 0.09, 0.10, 0.15, 0.09, 0.09]
+        names = ['adversarial loss 2', 'adversarial loss 1', 'condition loss', 'cycle consistency loss',
+                  'dis loss', 'gen loss', 'total loss']
+        idx = 0
+        step = [i for i in range(len(self.losses["dis_fake"]))]
+        fontsize = 10
+        for name, val in self.losses.items():
+            if idx == 6:
+                continue
+            plt.subplot(xy[idx])
+            plt.title(names[idx], fontsize=fontsize + 2)
+            plt.plot(step[::], val[::], linewidth=widths[idx], color='k')  # label=labels[idx]
+            # plt.xlabel("step", fontsize=fontsize - 1)
+            # plt.ylabel("loss value", fontsize=fontsize - 1)
+            # 设置刻度字体大小
+            plt.xticks(fontsize=fontsize - 1)
+            plt.yticks(fontsize=fontsize - 1)
+            idx += 1
+        plt.savefig(os.path.join(visual_path, 'losses.jpg'))
+        plt.close()
+
+        fontsize = 20
+        plt.figure(dpi=80)
+        plt.title(names[-1], fontsize=fontsize+6)
+        plt.plot(step[::], self.losses['total'][::], linewidth=0.2, color='k')
+        # plt.xlabel("step", fontsize=fontsize - 6)
+        # plt.ylabel("loss value", fontsize=fontsize - 6)
+        # 设置刻度字体大小
+        plt.xticks(fontsize=fontsize - 6)
+        plt.yticks(fontsize=fontsize - 1)
+        plt.savefig(os.path.join(visual_path, "total_loss.jpg"))
+        plt.close()
 
     def print_losses_info(self, info_dict):  # 打印loss -> cmd || log
         msg = '[{}][Epoch: {:0>3}/{:0>3}; Images: {:0>4}/{:0>4}; Time: {:.3f}s/Batch({}); LR: {:.7f}] '.format(
@@ -29,6 +89,8 @@ class Visualizer(object):
 
         for k, v in info_dict['losses'].items():  # 不同loss分开显示
             msg += '| {}: {:.4f} '.format(k, v)
+            self.losses[k].append(v)  # 记录下所有损失
+        self.losses['total'].append(10*self.losses["gen_rec"][-1] + self.losses["dis_fake"][-1]+self.losses["dis_real"][-1] + 160*self.losses["dis_real_aus"][-1])
         msg += '|'
         print(msg)
 
@@ -53,7 +115,6 @@ class Visualizer(object):
             # tile是在某个维度上重复的意思
         
         # image_numpy = np.transpose(image_numpy, (1, 2, 0)) * 255.0  # 输入应该在 [0, 1]
-        
         image_numpy = (np.transpose(image_numpy, (1, 2, 0)) / 2. + 0.5) * 255.0  # 把像素转到[0,255]，输入应该在[-1,1]
         image_numpy = image_numpy.astype(imtype)
         return Image.fromarray(image_numpy)

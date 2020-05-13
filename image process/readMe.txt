@@ -25,20 +25,20 @@ ps: if can do it yourself :)
 
 6. To test, you can define you own test mode:
 # random target mode: select a target image randomly for every image
-python main.py --model=ganimation --mode=test --data_root=./datasets/face --batch_size=1 --n_threads=0 --load_epoch=30 --ckpt_dir=C:\Users\81955\Desktop\Expression_Transformation\ckpts\face\ganimation\200411_174647
-python main.py --model=ganimation --mode=test --data_root=./datasets/face --interpolate_len=8 --batch_size=1 --n_threads=0 --load_epoch=30 --ckpt_dir=C:\Users\81955\Desktop\Expression_Transformation\ckpts\face\ganimation\200411_174647
-python main.py --model=ganimation --mode=test --data_root=./datasets/face --interpolate_len=8 --load_size=200 --final_size=200 --batch_size=1 --n_threads=0 --load_epoch=30 --ckpt_dir=C:\Users\81955\Desktop\Expression_Transformation\ckpts\face\ganimation\200411_174647
-python main.py --model=ganimation --mode=test --data_root=C:\Users\81955\Desktop\datasets\face --batch_size=1 --n_threads=0 --load_epoch=30 --ckpt_dir=C:\Users\81955\Desktop\ckpts\face\ganimation\200411_174647 --test_mode=single_target --single_target_img=C:\Users\81955\Desktop\datasets\face\imgs\63.jpg
+python main.py --mode=test --data_root=./datasets/face --batch_size=1 --n_threads=0 --load_epoch=30 --ckpt_dir=C:\Users\81955\Desktop\Expression_Transformation\ckpts\face\ganimation\200411_174647
+python main.py  --mode=test --data_root=./datasets/face --interpolate_len=8 --batch_size=1 --n_threads=0 --load_epoch=30 --ckpt_dir=C:\Users\81955\Desktop\Expression_Transformation\ckpts\face\ganimation\200411_174647
+python main.py --mode=test --data_root=./datasets/face --interpolate_len=8 --load_size=200 --final_size=200 --batch_size=1 --n_threads=0 --load_epoch=30 --ckpt_dir=C:\Users\81955\Desktop\Expression_Transformation\ckpts\face\ganimation\200411_174647
+python main.py  --mode=test --data_root=C:\Users\81955\Desktop\datasets\face --batch_size=1 --n_threads=0 --load_epoch=30 --ckpt_dir=C:\Users\81955\Desktop\ckpts\face\ganimation\200411_174647 --test_mode=single_target --single_target_img=C:\Users\81955\Desktop\datasets\face\imgs\63.jpg
 
 
 # single target mode: a single target for all test images
-python main.py --model=ganimation --mode=test --data_root=./datasets/face --batch_size=1 --n_threads=0 --load_epoch=30 --ckpt_dir=C:\Users\81955\Desktop\Expression_Transformation\ckpts\face\ganimation\200411_174647 --test_mode=single_target --single_target_img=C:\Users\81955\Desktop\Expression_Transformation\datasets\face\imgs\117.jpg --save_all_alpha_image
-python main.py --model=ganimation --mode=test --data_root=./datasets/face --interpolate_len=6 --batch_size=1 --n_threads=0 --load_epoch=30 --ckpt_dir=C:\Users\81955\Desktop\Expression_Transformation\ckpts\face\ganimation\200411_174647 --test_mode=single_target --single_target_img=C:\Users\81955\Desktop\Expression_Transformation\datasets\face\imgs\19_0.jpg --save_all_alpha_image
-python main.py --model=ganimation --mode=test --data_root=./datasets/face --batch_size=1 --n_threads=0 --load_epoch=30 --ckpt_dir=C:\Users\81955\Desktop\Expression_Transformation\ckpts\face\ganimation\200411_174647 --test_mode=single_target --single_target_img=C:\Users\81955\Desktop\Expression_Transformation\datasets\face\imgs\117.jpg
+python main.py --mode=test --data_root=./datasets/face --batch_size=1 --n_threads=0 --load_epoch=30 --ckpt_dir=C:\Users\81955\Desktop\Expression_Transformation\ckpts\face\ganimation\200411_174647 --test_mode=single_target --single_target_img=C:\Users\81955\Desktop\Expression_Transformation\datasets\face\imgs\117.jpg --save_all_alpha_image
+python main.py --mode=test --data_root=./datasets/face --interpolate_len=6 --batch_size=1 --n_threads=0 --load_epoch=30 --ckpt_dir=C:\Users\81955\Desktop\Expression_Transformation\ckpts\face\ganimation\200411_174647 --test_mode=single_target --single_target_img=C:\Users\81955\Desktop\Expression_Transformation\datasets\face\imgs\19_0.jpg --save_all_alpha_image
+python main.py --mode=test --data_root=C:\Users\81955\Desktop\datasets\face --batch_size=1 --n_threads=0 --load_epoch=30 --ckpt_dir=C:\Users\81955\Desktop\ckpts\face\ganimation --test_mode=single_target --single_target_img=C:\Users\81955\Desktop\datasets\face\imgs\117.jpg
 
 
 # if your dataset has many image with different size, you should use resize_or_crop:
-python main.py --model=ganimation --mode=test --data_root=C:\Users\81955\Desktop\datasets\face --batch_size=1 --n_threads=0 --load_epoch=30 --ckpt_dir=C:\Users\81955\Desktop\ckpts\face\ganimation\200411_174647 --test_mode=single_target --single_target_img=C:\Users\81955\Desktop\datasets\face\imgs\0.jpg --resize_or_crop=resize_and_crop --load_size=200 --final_size=200
+python main.py --mode=test --data_root=C:\Users\81955\Desktop\datasets\face --batch_size=1 --n_threads=0 --load_epoch=30 --ckpt_dir=C:\Users\81955\Desktop\ckpts\face\ganimation\200411_174647 --test_mode=single_target --single_target_img=C:\Users\81955\Desktop\datasets\face\imgs\0.jpg --resize_or_crop=resize_and_crop --load_size=200 --final_size=200
 # pair target mode: offer a pair of <original_image, target_image>
 # todo
 
@@ -60,12 +60,14 @@ ps: For erase black texture in some generate images.
 finetune:
 python main.py --data_root datasets/celebA --sample_img_freq 300 --n_threads 18  --ckpt_dir ckpts/face/ganimation/200411_174647 --load_epoch 30 --epoch_count 31 --niter 30 --niter_decay 30 --save_epoch_freq 5
 
-python main.py --model=ganimation --mode=test --data_root=./datasets/face --interpolate_len=5 --batch_size=25 --n_threads=16 --load_epoch=45 --ckpt_dir=ckpts/face/ganimation/200411_174647
+python main.py --data_root ../celebA --n_threads 16 --ckpt_dir ckpts/celebA/ganimation/200510_180637 --load_epoch 30 --epoch_count 31 --niter 30 --niter_decay 10
 
-python main.py --model=ganimation --mode=test --data_root=./datasets/face --n_threads=18 --load_epoch=30 --ckpt_dir=ckpts/face/ganimation/200411_174647 --test_mode=single_target --single_target_img=datasets/face/imgs/117.jpg
+python main.py --mode=test --data_root=./datasets/face --interpolate_len=5 --batch_size=25 --n_threads=16 --load_epoch=45 --ckpt_dir=ckpts/face/ganimation/200411_174647
+
+python main.py --mode=test --data_root=./datasets/face --n_threads=18 --load_epoch=30 --ckpt_dir=ckpts/face/ganimation/200411_174647 --test_mode=single_target --single_target_img=datasets/face/imgs/117.jpg
 
 train:
-python main.py --data_root datasets/celebA
+python main.py --data_root datasets/celebA --display
 
 
 C:\Users\81955\Desktop\ckpts\face\ganimation\200411_174647

@@ -65,19 +65,38 @@ class Solver(object):
                 last_print_step_t = time.time()  # 更新一下上次打印到控制台的时间
 
                 # 打印损失
-                info_dict = {'epoch': epoch, 
+                info_dict = {
+                        'epoch': epoch,
+                         'epoch_len': self.epoch_len,
+                         'epoch_steps': epoch_steps,
+                         'epoch_steps_len': len(self.train_dataset),
+                         'step_time': avg_step_t,
+                         'cur_lr': self.cur_lr,
+                         'log_path': os.path.join(self.opt.ckpt_dir, self.opt.log_file),
+                         'losses': cur_losses
+                    }
+                self.visual.print_losses_info(info_dict)
+
+            # 可视化
+            if self.opt.display and self.train_total_steps % self.opt.display_freq == 0:
+                cur_visuals = self.train_model.get_latest_visuals()  # 获取可视化对象（字典）
+                visual_path = os.path.join('.', 'visualization')  # 可视化保存路径
+                # cur_losses = self.train_model.get_latest_losses()  # 获得当前损失（一个所有损失组成的字典）
+                avg_step_t = (time.time() - last_print_step_t) / self.opt.print_losses_freq  # 计算每个step（图片）需要平均处理时间
+                last_print_step_t = time.time()  # 更新一下上次打印到控制台的时间
+                # 绘制信息
+                plot_dict = {''
+                             'epoch': epoch,
                              'epoch_len': self.epoch_len,
                              'epoch_steps': epoch_steps,
                              'epoch_steps_len': len(self.train_dataset),
                              'step_time': avg_step_t,
                              'cur_lr': self.cur_lr,
-                             'log_path': os.path.join(self.opt.ckpt_dir, self.opt.log_file),
-                             'losses': cur_losses
-                            }
-                self.visual.print_losses_info(info_dict)
-
-            if self.visual.display:
-                pass  # todo: 可视化
+                             'visual_path': visual_path,
+                             'img': cur_visuals,
+                             'log_path': os.path.join(self.opt.ckpt_dir, self.opt.log_file)
+                }
+                self.visual.plot(plot_dict)  # 绘制
 
     def test_networks(self, opt):  # 测试网络
         self.init_test_setting(opt)

@@ -105,21 +105,10 @@ class GANimationModel(BaseModel):
         # 从符合目标表情的虚假图片重建原始表情的源图片, 身份损失，也即循环一致性损失
         self.loss_gen_rec = self.criterionL1(self.rec_real_img, self.src_img)  # 循环一致性损失
 
-        # constrain on AUs mask（注意的是动作，所以也叫aus_mask），防止AUs过饱和（全为1）而失去效用
-        # real_img ,fake_img 通过生成器各产生一张注意力掩膜和一张色彩掩模
-        self.loss_gen_mask_real_aus = torch.mean(self.aus_mask)  # 生成的aus_mask
-        self.loss_gen_mask_fake_aus = torch.mean(self.rec_aus_mask)  # 重建的rec_aus_mask
-
-        # 总变分损失，对注意力掩膜进行平滑处理
-        self.loss_gen_smooth_real_aus = self.criterionTV(self.aus_mask)
-        self.loss_gen_smooth_fake_aus = self.criterionTV(self.rec_aus_mask)
-
         # 线性叠加所有损失项，每个损失有一个系数（是超参数，需要通过训练学习）
         self.loss_gen = self.opt.lambda_dis * self.loss_gen_GAN \
                         + self.opt.lambda_aus * self.loss_gen_fake_aus \
-                        + self.opt.lambda_rec * self.loss_gen_rec \
-                        + self.opt.lambda_mask * (self.loss_gen_mask_real_aus + self.loss_gen_mask_fake_aus) \
-                        + self.opt.lambda_tv * (self.loss_gen_smooth_real_aus + self.loss_gen_smooth_fake_aus)
+                        + self.opt.lambda_rec * self.loss_gen_rec
 
         self.loss_gen.backward()
 
@@ -152,7 +141,7 @@ class GANimationModel(BaseModel):
         return super(GANimationModel, self).clean_ckpt(epoch, load_models_name)
 
     def get_latest_losses(self):  # 返回最新的损失
-        get_losses_name = ['dis_fake', 'dis_real', 'dis_real_aus', 'gen_rec']
+        get_losses_name = ['dis_fake', 'dis_real', 'dis_real_aus', 'gen_rec', 'dis', 'gen']
         return super(GANimationModel, self).get_latest_losses(get_losses_name)
 
     def get_latest_visuals(self):  # 返回最新的可视化对象

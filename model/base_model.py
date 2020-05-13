@@ -77,7 +77,7 @@ class BaseModel:
 
     def get_latest_visuals(self, visuals_name):  # 返回最新的需要可视化的内容
         # visuals_name is a list of name to visualize
-        visual_ret = OrderedDict()  # 学过汇编的都知道，ret is return
+        visual_ret = OrderedDict()
         for name in visuals_name:
             if isinstance(name, str) and hasattr(self, name):
                 visual_ret[name] = getattr(self, name)
