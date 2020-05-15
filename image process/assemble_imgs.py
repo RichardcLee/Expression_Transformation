@@ -1,4 +1,5 @@
 # 写在前面： 这是个危险操作，请认真检查路径
+# dangerous operation!
 import os
 import shutil
 import argparse
@@ -17,7 +18,7 @@ if key != "Y" and key != "y":
     print("exit.")
     exit(-1)
 print("input_dir: '%s', output_dir: '%s'" % (input_dir, output_dir))
-key = input("All paths are right？Y/N\n")
+key = input("[!!!]All paths are right？Y/N\n")
 if key != "Y" and key != "y":
     print("exit.")
     exit(-1)

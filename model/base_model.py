@@ -12,11 +12,11 @@ class BaseModel:
         self.name = "Base"
 
     def initialize(self, opt):
+        """初始化公操作，子类调用"""
         self.opt = opt
         self.gpu_ids = self.opt.gpu_ids
         self.device = torch.device('cuda:%d' % self.gpu_ids[0] if self.gpu_ids else 'cpu')
         self.is_train = (self.opt.mode == "train")
-        # inherit to define network model 
         self.models_name = []  # 用于存放模型名
 
     def setup(self):

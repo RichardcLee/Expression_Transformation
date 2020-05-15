@@ -36,7 +36,7 @@ class Options(object):
         parser.add_argument('--imgs_dir', type=str, default="imgs", help='Path to image')
         # 测试模式
         parser.add_argument('--test_mode', type=str, default="random_target", help='Test mode: [single_target|random_target|pair_target]')
-        # 配对测试模式,目标图片的路径 todo
+        # 配对测试模式,目标图片的路径 todo. not do
         parser.add_argument('--target_imgs_dir', type=str, default="imgs", help='Path to target image')
         # 单张目标图片测试模式，需要给出该目标图片的路径
         parser.add_argument('--single_target_img', type=str, default="none", help='Path to single target image')
@@ -105,9 +105,9 @@ class Options(object):
         # 学习率衰减间隔
         parser.add_argument('--lr_decay_iters', type=int, default=50, help='Multiply by a gamma every lr_decay_iters iterations')
         # 设置开始时是第几个epoch，便于保存chekcpoint和进行tune
-        parser.add_argument('--epoch_count', type=int, default=1, help='The starting epoch count, we save the model by <epoch_count>, <epoch_count>+<save_latest_freq>, ...')
+        parser.add_argument('--epoch_count', type=int, default=1, help='The starting epoch count, save the model by <epoch_count>, <epoch_count>+<save_latest_freq>, ...')
 
-        # niter + niter_decay = 总epoch（包括预训练模型的epoch）
+        # niter + niter_decay = 总epoch
         # 保持初始学习率的迭代次数
         parser.add_argument('--niter', type=int, default=20, help='# of iter at starting learning rate')
         # 线性下降学习率到零的次数
@@ -125,8 +125,8 @@ class Options(object):
         parser.add_argument('--print_losses_freq', type=int, default=100, help='Print log every print_freq step.')
         # 每多少个epoch保存一次checkpoints
         parser.add_argument('--save_epoch_freq', type=int, default=2, help='Save checkpoint every save_epoch_freq epoch.')
-        # 数据可视化更新频率，注意可视化频率不应比打印损失频率高
-        parser.add_argument('--display_freq', type=int, default=2000, help='Data visualization every display_freq step.')
+        # 数据可视化更新频率，注意可视化频率不应比打印损失频率高（频率不要太低，否则影响训练速度）
+        parser.add_argument('--display_freq', type=int, default=4000, help='Data visualization every display_freq step.')
         return parser
 
     def parse(self):    # 解析参数
@@ -146,7 +146,7 @@ class Options(object):
         if opt.display_freq <= opt.print_losses_freq:
             opt.display = opt.print_losses_freq - 1
 
-        # if test, disable visdom, update results path
+        # 训练模式稍有不同
         if opt.mode == "test":  # 测试环节需进行如下特殊处理：
             opt.display = False   # 关闭可视化
             # 修改results路径，e.g. results\celebA_30

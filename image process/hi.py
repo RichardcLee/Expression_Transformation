@@ -14,7 +14,7 @@ cv2.imshow('grayscale',image1)
 image2 = image1.copy()		# 复制图片
 for i in range(0,image1.shape[0]):	#image.shape表示图像的尺寸和通道信息(高,宽,通道)
     for j in range(0,image1.shape[1]):
-	    image2[i,j]= 255 - image1[i,j]
+	image2[i,j]= 255 - image1[i,j]
 cv2.imshow('colorReverse',image2)
 
 # 边缘提取

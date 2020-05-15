@@ -14,12 +14,12 @@ class Visualizer(object):
     def initialize(self, opt):
         self.opt = opt
         self.losses = {
-            "dis_fake": [],
-            "dis_real": [],
-            "dis_real_aus": [],
-            "gen_rec": [],
-            'dis': [],
-            'gen': [],
+            "dis_fake": [],  # WGAN-GP对抗损失第二项，值越大越好（正值）
+            "dis_real": [],  # WGAN-GP对抗损失第一项，值越小越好（负值）
+            "dis_real_aus": [],  # 条件表情损失第二项
+            "gen_rec": [],  # 循环一致性损失
+            'dis': [],  # 生成器损失
+            'gen': [],  # 判别器损失
             "total": []
         }
         plt.rcParams['font.sans-serif'] = ['SimHei']  # 用来正常显示中文标签
@@ -30,7 +30,7 @@ class Visualizer(object):
         img_dict = plot_dict['img']
         # 可视化训练过程中的效果
         for name, img in img_dict.items():
-            tmp = self.numpy2im(img.cpu().detach().float().numpy()[0])  # 注意一个batch 25张图，这里只选择一张即可
+            tmp = self.numpy2im(img.cpu().detach().float().numpy()[0])  # 注意一个batch n张图，这里只选择一张即可
             path = os.path.join(plot_dict['visual_path'], name+'.jpg')
             tmp.save(path)
             tmp.close()

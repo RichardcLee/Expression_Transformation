@@ -10,7 +10,7 @@ args = parser.parse_args()
 file_list = os.listdir(args.image_path)
 os.chdir(args.image_path)   # 切换当前工作目录
 
-for idx, file in enumerate(file_list):
+for idx, file in enumerate(file_list):  # 批量重命名
     os.rename(file, str(args.start_idx + idx) + "." + file.split(".")[-1])
 
 print("Finish!")
