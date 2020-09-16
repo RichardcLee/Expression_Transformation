@@ -117,6 +117,7 @@ class Solver(object):
                     # alpha是AU的激活度，表征源图像向目标图像转换的度
                     # 例如：interpolate_len=5, idx=2, α=[0.2, 0.4, 0.6, 0.8, 1.0]
                     cur_alpha = (idx + 1.0) / float(self.opt.interpolate_len)
+                    # 通过下式控制变换程度
                     # targetAUs = α·targetAUs + (1-α)·sourceAUs
                     cur_tar_aus = cur_alpha * batch['tar_aus'] + (1 - cur_alpha) * batch['src_aus']
                     test_batch = {'src_img': batch['src_img'], 'tar_aus': cur_tar_aus,

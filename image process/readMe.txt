@@ -47,7 +47,7 @@ python main.py --mode=test --data_root=C:\Users\81955\Desktop\datasets\face --ba
 
 
 # pair target mode: offer a pair of <original_image, target_image>
-# todo
+# todo. not do
 
 
 # if your dataset has many image with different size, you should use resize_or_crop:

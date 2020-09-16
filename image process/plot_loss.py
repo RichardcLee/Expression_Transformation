@@ -6,7 +6,7 @@ plt.rcParams['font.sans-serif']=['SimHei']  # 用来正常显示中文标签
 plt.rcParams['axes.unicode_minus']=False  # 用来正常显示负号
 
 lines = []
-with open(r"C:\Users\81955\Desktop\logs\logs2.txt", "r+") as f:
+with open(r"C:\Users\81955\Desktop\ckpts\face\ganimation\200513_232207\logs.txt", "r+") as f:
     lines = f.readlines()
 
 
@@ -38,7 +38,7 @@ for line in lines:
     loss["gen_rec"].append(d)
     loss["total"].append(10*d + 1*(a+b) + 160*c)
 
-print(loss)
+# print(loss)
 
 plt.figure(dpi=120)
 plt.tight_layout()
@@ -46,12 +46,12 @@ plt.subplots_adjust(wspace=0.45, hspace=0.5)  # 调整子图间距
 xy = ["321","322", "323", "324", "325", "326"]
 widths = [0.07, 0.07, 0.07, 0.09, 0.09, 0.07]
 labels = ['adversarial loss 2', 'adversarial loss 1', 'condition loss', 'cycle consistency loss', 'dis loss', 'gen loss', 'total loss']
-# ticks_y = [[0, 1, 2, 3, 4], [-5, -4, -3, -2, -1], [0, 0.004, 0.008, 0.012, 0.016, 0.020, 0.022, 0.024, 0.026], [0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3]]
-# ticks_x = ['0', '2k', '4k', '6k', '8k', '1w']
-# scale_x = [0, 1000, 2000, 3000, 4000, 5000]
+ticks_y = [[0, 1, 2, 3, 4, 5], [-5, -4, -3, -2, -1, 0], [0, 0.004, 0.008, 0.012, 0.016], [0, 0.1, 0.2, 0.3, 0.4], [0, 0.1, 0.2, 0.3, 0.4], [-3, -2, -1, 0, 1, 2, 3, 4 ,5, 6]]
+ticks_x = ['0', '1w', '2w', '3w', '4w']
+scale_x = [0, 10000, 20000, 30000, 40000]
 idx = 0
-space = 5
-step = [i for i in range(len(loss["dis_fake"]))]
+space = 10  # 控制损失显示间距，避免图像线条过于集中
+step = [i for i in range(len(loss["dis_fake"]))]  # step数
 fontsize = 10
 
 for name, val in loss.items():
@@ -65,10 +65,8 @@ for name, val in loss.items():
         plt.xlabel("step", fontsize=fontsize-1)
         plt.ylabel("loss value", fontsize=fontsize-1)
     # 设置刻度字体大小
-    # plt.xticks(scale_x, ticks_x, fontsize=fontsize-1)
-    # plt.yticks(ticks_y[idx], fontsize=fontsize-1)
-    plt.xticks(fontsize=fontsize-1)
-    plt.yticks(fontsize=fontsize-1)
+    plt.xticks(scale_x, ticks_x, fontsize=fontsize-1)
+    plt.yticks(ticks_y[idx], fontsize=fontsize-1)
     idx += 1
 plt.savefig("1.jpg")
 plt.show()
@@ -79,9 +77,7 @@ plt.plot(step[::space], loss['total'][::space], linewidth=0.2, color='k')
 plt.xlabel("step", fontsize=fontsize-6)
 plt.ylabel("loss value", fontsize=fontsize-6)
 # 设置刻度字体大小
-# plt.xticks(scale_x, ticks_x, fontsize=fontsize-6)
-# plt.yticks(fontsize=fontsize-1)
-plt.xticks(fontsize=fontsize-6)
+plt.xticks(scale_x, ticks_x, fontsize=fontsize-6)
 plt.yticks(fontsize=fontsize-1)
 
 plt.savefig("2.jpg")
